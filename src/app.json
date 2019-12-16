@@ -1,0 +1,40 @@
+{
+  "pages": [
+    "pages/index/main",
+    "pages/analysis/main",
+    "pages/my/main",
+    "pages/content/main"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#0081ff",
+    "navigationBarTitleText": "可汗家",
+    "navigationBarTextStyle": "white"
+  },
+  "tabBar": {
+    "color": "#999",
+    "backgroundColor": "#fafafa",
+    "selectedColor": "#333",
+    "borderStyle": "white",
+
+    "list": [{
+      "text": "学习",
+      "pagePath": "pages/index/main",
+      "iconPath": "static/tabs/index.png",
+      "selectedIconPath": "static/tabs/index-active.png"
+    }, {
+      "text": "分析",
+      "pagePath": "pages/analysis/main",
+      "iconPath": "static/tabs/analysis.png",
+      "selectedIconPath": "static/tabs/analysis-active.png"
+    }, {
+      "text": "我的",
+      "pagePath": "pages/my/main",
+      "iconPath": "static/tabs/my.png",
+      "selectedIconPath": "static/tabs/my-active.png"
+    }],
+    "position": "bottom",
+    "style": "v2"
+  },
+  "requiredBackgroundModes": ["audio"]
+}

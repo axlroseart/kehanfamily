@@ -1,0 +1,7 @@
+build/*.js
+config/*.js
+src/colorui/*
+src/pages/content/*
+src/pages/analysis/*
+src/utils/*
+src/api/*
