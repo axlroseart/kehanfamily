@@ -40,6 +40,14 @@ const apiConfig = {
     type: 'json',
     params: {
     }
+  },
+  // 点金币 - 回答正确加分
+  addScore: {
+    url: '/mapp/user/addWordMoney',
+    method: 'POST',
+    type: 'json',
+    params: {
+    }
   }
 }
 

@@ -12,8 +12,8 @@
     </view> -->
     <!-- 轮播图 -->
     <swiper class="card-swiper" :class="dotStyle?'square-dot':'round-dot'" :indicator-dots="true" :circular="true"
-    :autoplay="true" interval="5000" duration="500" @change="cardSwiper" indicator-color="#8799a3"
-    indicator-active-color="#0081ff">
+    :autoplay="false" interval="5000" duration="500" @change="cardSwiper" indicator-color="#8799a3"
+    indicator-active-color="#fff">
       <swiper-item v-for="(item,index) in swiperList" :key="index" :class="cardCur==index?'cur':''">
         <view class="swiper-item">
           <image :src="item.url" mode="aspectFill" v-if="item.type=='image'"></image>
@@ -36,11 +36,11 @@
           </div>
         </div>
       </div> -->
-      <div class="aui-flex aui-flex-two">
+      <!-- <div class="aui-flex aui-flex-two">
         <div class="aui-flex-box">
           <img src="../../../static/images/ad-004.png" alt class="main-image-4" />
         </div>
-      </div>
+      </div> -->
       <!-- tab 标签页 -->
       <div class="index-grade-tab">
         <!-- cu-ui-tab -->
@@ -99,6 +99,8 @@
               <button class="cu-btn cuIcon bg-blue shadow" @click="goStory('click', item.id)">
                 <text class="cuIcon-read"></text>
               </button>
+              <!-- <button @click="goStory('listen', item.id)">听金币</button>
+              <button @click="goStory('click', item.id)">点金币</button> -->
             </div>
           </div>
         </div>
@@ -112,7 +114,6 @@
 import '../../assets/styles/index'
 import iconDemo from '../../assets/images/icon-child.png'
 import banner1 from '../../../static/images/banner1.jpg'
-import banner2 from '../../../static/images/banner2.jpg'
 import { mapState } from 'vuex'
 export default {
   data() {
@@ -123,7 +124,6 @@ export default {
       fontSize: 24,
       iconDemo,
       banner1,
-      banner2,
       TabCur: 0,
       scrollLeft: 0,
       cardCur: 0,
@@ -131,18 +131,6 @@ export default {
         id: 0,
         type: 'image',
         url: banner1
-      }, {
-        id: 1,
-        type: 'image',
-        url: banner2
-      }, {
-        id: 2,
-        type: 'image',
-        url: banner1
-      }, {
-        id: 3,
-        type: 'image',
-        url: banner2
       }],
       dotStyle: false,
       towerStart: 0,
@@ -154,32 +142,69 @@ export default {
       test_password: '123456'
     }
   },
-  mounted() {
-    // 登录
-    this.Api.userLogin({
-      data: {
-        account: this.test_account,
-        password: this.test_password
-      }
-    }).then(res => {
-      this._checkData(res).then(res => {
-        res = res.data
-        this.$store.dispatch('setToken', res.token)
-        this.getBaseData()
-      })
-    })
+  onShow() {
+    console.log('==> 是否登录:', this.isLogin)
+    this.getBaseData()
+    // if (!this.isLogin) {
+    //   wx.navigateTo({
+    //     url: '/pages/user/main'
+    //   })
+    // } else {
+    //   this.getBaseData()
+    // }
+    // this.Api.addScore(
+    //   {
+    //     data: {
+    //       amount: 10,
+    //       userId: 0,
+    //       word: 'top'
+    //     },
+    //     usertoken: this.token
+    //   }
+    // ).then(res => {
+    //   this._checkData(res).then(res => {
+    //     console.log(res)
+    //   }).catch(err => {
+    //     console.log(err)
+    //   })
+    // }).catch(err => {
+    //   console.log(err)
+    // })
   },
   methods: {
     // 获取级别数据
     getBaseData() {
+      wx.showLoading({
+        title: '获取数据中'
+      })
       this.Api.fetchLevelData({
         usertoken: this.token
       }).then(res => {
+        wx.hideLoading()
         this._checkData(res).then(res => {
           this.tabs = res.data
           let defaultLevelId = res.data[0].id
           // 请求默认第一个级别的书籍数据
           this.fetchCurrLevelData(defaultLevelId)
+        }).catch(err => {
+          // 未登录
+          if (err.code === 1000) {
+            wx.navigateTo({
+              url: '/pages/user/main'
+            })
+          } else {
+            wx.showToast({
+              title: err.msg,
+              icon: 'none',
+              duration: 2000
+            })
+          }
+        })
+      }).catch(() => {
+        wx.showToast({
+          title: '服务器错误',
+          icon: 'none',
+          duration: 2000
         })
       })
     },
@@ -201,7 +226,7 @@ export default {
     // 故事内容页跳转
     goStory(type, id) {
       wx.navigateTo({
-        url: '/pages/content/main?id=1',
+        url: '/pages/content/' + type + '/main',
         events: {
           // 为指定事件添加一个监听器，获取被打开页面传送到当前页面的数据
           acceptDataFromOpenedPage: function(data) {
@@ -252,7 +277,8 @@ export default {
   },
   computed: {
     ...mapState({
-      token: state => state.common.token
+      token: state => state.common.token,
+      isLogin: state => state.common.isLogin
     }),
     navbarSliderClass() {
       if (this.activeIndex === 0) {

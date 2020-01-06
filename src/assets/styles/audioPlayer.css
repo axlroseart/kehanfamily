@@ -25,11 +25,11 @@
 
 .player {
   background: #eef3f7;
-  width: 90%;
+  width: 100%;
   /* min-height: 480px; */
   box-shadow: 0px 15px 35px -5px rgba(50, 88, 130, 0.32);
   border-radius: 15px;
-  padding: 10px;
+  /* padding: 10px; */
   position: absolute;
   top: 82px;
 }
@@ -38,6 +38,7 @@
   align-items: flex-start;
   position: relative;
   z-index: 4;
+  padding: 10px;
 }
 
 .player-cover {
@@ -218,6 +219,7 @@
   width: 100%;
   margin-top: -15px;
   user-select: none;
+  padding: 10px;
 }
 .progress__top {
   display: flex;

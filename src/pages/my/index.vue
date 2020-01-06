@@ -6,7 +6,7 @@
 					<view class="cu-item">
 						<view class="cu-avatar round lg" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big10006.jpg);"></view>
 						<view class="content flex-sub">
-							<view class="text-grey">正义天使 凯尔</view>
+							<view class="text-grey">可汗家</view>
 							<view class="text-gray text-sm flex justify-between">
 								十天前
 								<view class="text-gray text-sm">
@@ -93,6 +93,7 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
 export default {
   data() {
     return {
@@ -133,6 +134,13 @@ export default {
         name: '问答'
       }]
     }
+  },
+  created() {
+  },
+  computed: {
+    ...mapState({
+      isLogin: state => state.common.isLogin
+    })
   }
 }
 </script>

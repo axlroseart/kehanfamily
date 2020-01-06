@@ -46,7 +46,11 @@ let baseWebpackConfig = {
     extensions: ['.js', '.vue', '.json', '.styl'],
     alias: {
       'vue': 'mpvue',
-      '@': resolve('src')
+      // '@': resolve('src'),
+      static: resolve("/static"),
+      "@": resolve("src/pages/"),
+      assets: resolve("src/assets"),
+      coms: resolve("src/components")
     },
     symlinks: false,
     aliasFields: ['mpvue', 'weapp', 'browser'],
