@@ -2,7 +2,7 @@
   <div class="click-index">
     <!-- 点金币 - H5外链 -->
     <div v-if="!isdone">跳转中...请稍后</div>
-    <web-view v-else :src="webViewSrc"></web-view>
+    <web-view v-else :src="webViewSrc" @bindmessage="getMsgFromWebview"></web-view>
     <!-- <web-view :src="webViewSrc"></web-view> -->
   </div>
 </template>
@@ -28,7 +28,8 @@ export default {
       self.id = data.data.id
       console.log('==> id:', self.id)
       console.log('==> token:', self.token)
-      self.webViewSrc = self.baseUrl + '?id=' + self.id + '&token=' + self.token + ''
+      console.log('==> score:', self.score)
+      self.webViewSrc = self.baseUrl + '?id=' + self.id + '&token=' + self.token + '&score=' + self.score + ''
       self.isdone = true
     })
   },
@@ -41,11 +42,16 @@ export default {
     },
     error(e) {
       console.log('==> error', e)
+    },
+    getMsgFromWebview(msg) {
+      console.log(msg)
+      this.$store.dispatch('fetchUserStore', msg.score)
     }
   },
   computed: {
     ...mapState({
-      token: state => state.common.token
+      token: state => state.common.token,
+      score: state => state.common.score
     })
   }
 }

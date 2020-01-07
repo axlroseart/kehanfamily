@@ -2,7 +2,8 @@ import getters from './getters'
 
 const state = {
   isLogin: false,
-  token: ''
+  token: '',
+  score: 0
 }
 
 export default {

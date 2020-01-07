@@ -44,7 +44,8 @@
               >
                 <text class="cuIcon-like"></text>
               </div> -->
-              <text class="listen-text" @click="stop">停止播放</text>
+              <!-- <text class="listen-text" @click="stop">停止播放</text> -->
+              <button class="cu-btn lines-blue round shadow" @click="stop">停止播放</button>
               <!-- <div class="player-controls__item" @click="prevTrack">
                 <text class="cuIcon-pullleft"></text>
               </div>
@@ -94,7 +95,6 @@ export default {
       bgm: null,
       circleLeft: null,
       barWidth: null,
-      duration: 0,
       currentTime: 0,
       isTimerPlaying: false,
       tracks: [],
@@ -103,7 +103,7 @@ export default {
       currentTrackIndex: 0,
       transitionName: null,
       dotStyle: false,
-      score: 0,
+      // score: 0,
       swiperList: [],
       correctCurr: 0,
       cardCur: 0,
@@ -168,6 +168,15 @@ export default {
             setTimeout(() => {
               self.generateTime()
             }, 1000)
+          })
+          // 播放错误事件
+          self.bgm.onError(() => {
+            console.log('==> Error')
+            wx.showToast({
+              title: '音频加载失败',
+              icon: 'none',
+              duration: 2000
+            })
           })
         }).catch(err => {
           wx.hideLoading()
@@ -335,7 +344,8 @@ export default {
   },
   computed: {
     ...mapState({
-      token: state => state.common.token
+      token: state => state.common.token,
+      score: state => state.common.score
     })
   },
   onHide() {
@@ -345,6 +355,11 @@ export default {
     if (this.bgm) this.bgm.stop()
     // reset data
     // this.resource = null
+    this.correctCurr = 0
+    this.cardCur = 0
+    this.currentTrackIndex = 0
+    this.duration = 0
+    this.currentTime = 0
   }
 }
 </script>

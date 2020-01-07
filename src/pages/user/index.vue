@@ -47,10 +47,11 @@ export default {
           res = res.data
           this.$store.dispatch('setToken', res.token)
           this.$store.dispatch('fetchLoginStatus', true)
-          console.log(this.username, this.password)
+          // console.log(this.username, this.password)
           // wx.navigateTo({
           //   url: '/pages/index/main'
           // })
+          this.$store.dispatch('fetchUserStore', res.score)
           wx.navigateBack({
             delta: 1
           })

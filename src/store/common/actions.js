@@ -5,6 +5,9 @@ let actions = {
   },
   setToken({ commit }, data) {
     commit('USER_TOKEN', data)
+  },
+  fetchUserStore({ commit }, data) {
+    commit('USER_SCORE', data)
   }
 }
 

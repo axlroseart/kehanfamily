@@ -4,6 +4,10 @@ const mutations = {
   },
   USER_TOKEN(state, data) {
     state.token = data
+  },
+  // 得分
+  USER_SCORE(state, data) {
+    state.score = data
   }
 }
 
