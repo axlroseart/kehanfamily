@@ -27,7 +27,7 @@
       "iconPath": "static/tabs/index.png",
       "selectedIconPath": "static/tabs/index-active.png"
     }, {
-      "text": "我的",
+      "text": "个人中心",
       "pagePath": "pages/my/main",
       "iconPath": "static/tabs/my.png",
       "selectedIconPath": "static/tabs/my-active.png"

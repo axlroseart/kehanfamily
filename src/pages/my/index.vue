@@ -1,5 +1,10 @@
 <template>
   <div class="my-index">
+    <!-- <view class="cu-bar bg-white solid-bottom margin-top">
+      <view class="action">
+        <text class="cuIcon-title text-orange"></text> 我的
+      </view>
+    </view>
     <view class="cu-card case no-card">
 			<view class="cu-item shadow">
 				<view class="cu-list menu-avatar">
@@ -8,11 +13,42 @@
 						<view class="content flex-sub">
 							<view class="text-grey">{{ userInfo.name }}</view>
 							<view class="text-gray text-sm flex justify-between">
-								<!-- 十天前 -->
 								<view class="text-gray text-sm">
-									<text class="cuIcon-voice margin-lr-xs">阅读时长</text> {{ userInfo.readTimes }} 分钟
+									<text class="cuIcon-voice margin-lr-xs">听力时长</text> {{ userInfo.readTimes }} 分钟
 									<text class="cuIcon-coin margin-lr-xs">金币</text> {{ userInfo.score }}
-									<!-- <text class="cuIcon-messagefill margin-lr-xs"></text> 30 -->
+								</view>
+							</view>
+						</view>
+					</view>
+				</view>
+			</view>
+		</view> -->
+    <!-- <view class="cu-bar bg-white solid-bottom">
+			<view class="action">
+				<text class="cuIcon-titles text-orange"></text> 我的
+			</view>
+			<view class="action">
+				<switch :class="isCard?'checked':''" :checked="isCard?true:false" @change="IsCard"></switch>
+			</view>
+		</view> -->
+		<view class="cu-card case no-card">
+			<view class="cu-item shadow">
+				<view class="image">
+					<image :src="promoImg"
+					 mode="widthFix"></image>
+					<!-- <view class="cu-tag bg-blue">史诗</view> -->
+					<view class="cu-bar bg-shadeBottom"> <text class="text-cut">使命愿景还在构思中没有确定。</text></view>
+				</view>
+				<view class="cu-list menu-avatar">
+					<view class="cu-item">
+						<view class="cu-avatar round lg" style="background-image:url(http://134.175.157.41/avatar.png);"></view>
+						<view class="content flex-sub">
+							<view class="text-grey">{{ userInfo.name }}</view>
+							<view class="text-gray text-sm flex justify-between">
+								-
+								<view class="text-gray text-sm">
+                  <text class="cuIcon-voice margin-lr-xs">听力时长</text> {{ userInfo.readTimes }} 分钟
+									<text class="cuIcon-coin margin-lr-xs">金币</text> {{ userInfo.score }}
 								</view>
 							</view>
 						</view>
@@ -45,7 +81,7 @@
     <view class="cu-list menu" :class="[menuBorder?'sm-border':'',menuCard?'card-menu margin-top':'']">
       <view class="cu-item" :class="menuArrow?'arrow':''" @click="goAboutPage">
         <view class="content">
-          <text class="cuIcon-warn text-green"></text>
+          <text class="cuIcon-friend text-green"></text>
           <text class="text-grey">关于我们</text>
         </view>
         <view class="action">
@@ -58,9 +94,11 @@
 
 <script>
 import { mapState } from 'vuex'
+import promoImg from 'assets/images/promo.png'
 export default {
   data() {
     return {
+      promoImg,
       gridCol: 3,
       gridBorder: false,
       menuBorder: false,
