@@ -243,19 +243,19 @@
 }
 
 .progress__bar {
-  height: 6px;
+  height: 32rpx;
   width: 100%;
   cursor: pointer;
   background-color: #d0d8e6;
   display: inline-block;
-  border-radius: 10px;
+  border-radius: 2rpx;
 }
 
 .progress__current {
-  height: inherit;
+  height: 32rpx;
   width: 0%;
   background-color: #a3b3ce;
-  border-radius: 10px;
+  border-radius: 2rpx;
 }
 
 .album-info {

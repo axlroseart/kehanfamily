@@ -48,6 +48,14 @@ const apiConfig = {
     type: 'json',
     params: {
     }
+  },
+  // 获取用户信息
+  fetchUserData: {
+    url: '/mapp/user/getLoginedUser',
+    method: 'GET',
+    type: 'url',
+    params: {
+    }
   }
 }
 

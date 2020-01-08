@@ -8,6 +8,9 @@ const mutations = {
   // 得分
   USER_SCORE(state, data) {
     state.score = data
+  },
+  USER_INFO(state, data) {
+    state.userInfo = data
   }
 }
 

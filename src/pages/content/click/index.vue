@@ -45,7 +45,7 @@ export default {
     },
     getMsgFromWebview(msg) {
       console.log(msg)
-      this.$store.dispatch('fetchUserStore', msg.score)
+      this.$store.dispatch('fetchUserStore', msg.detail.score)
     }
   },
   computed: {

@@ -227,6 +227,7 @@ export default {
       this.isTimerPlaying = false
     },
     stop() {
+      wx.miniProgram.navigateTo( 'pages/index/main?score=' + self.score + '')
       if (this.bgm.stop) this.bgm.stop()
       this.isTimerPlaying = false
       this.resetPlayer()

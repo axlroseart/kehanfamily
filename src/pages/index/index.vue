@@ -144,32 +144,40 @@ export default {
   },
   onShow() {
     console.log('==> 是否登录:', this.isLogin)
-    this.getBaseData()
-    // if (!this.isLogin) {
-    //   wx.navigateTo({
-    //     url: '/pages/user/main'
-    //   })
-    // } else {
-    //   this.getBaseData()
-    // }
-    // this.Api.addScore(
-    //   {
-    //     data: {
-    //       amount: 10,
-    //       userId: 0,
-    //       word: 'top'
-    //     },
-    //     usertoken: this.token
-    //   }
-    // ).then(res => {
-    //   this._checkData(res).then(res => {
-    //     console.log(res)
-    //   }).catch(err => {
-    //     console.log(err)
-    //   })
-    // }).catch(err => {
-    //   console.log(err)
-    // })
+    this.Api.fetchUserData({
+      usertoken: this.token
+    }).then(res => {
+      this._checkData(res).then(res => {
+        res = res.data
+        this.$store.dispatch('fetchUserStore', res.score)
+        this.$store.dispatch('saveUserInfo', res)
+        // 获取首页故事列表数据
+        this.getBaseData()
+      }).catch(err => {
+        if (err.code === 1000) {
+          wx.navigateTo({
+            url: '/pages/user/main'
+          })
+        } else {
+          wx.showToast({
+            title: err.msg,
+            icon: 'none',
+            duration: 2000
+          })
+        }
+      })
+    }).catch(() => {
+      wx.showToast({
+        title: '获取用户信息失败',
+        icon: 'none',
+        duration: 2000
+      })
+    })
+  },
+  onLoad(data) {
+    console.log('==> webview传过来的数据：', data)
+    // 保存由webview传过来的score
+    this.$store.dispatch('fetchUserStore', data.score)
   },
   methods: {
     // 获取级别数据
@@ -226,7 +234,7 @@ export default {
     // 故事内容页跳转
     goStory(type, id) {
       wx.navigateTo({
-        url: '/pages/content/' + type + '/main',
+        url: '/pages/content/' + type + '/main?score=999',
         events: {
           // 为指定事件添加一个监听器，获取被打开页面传送到当前页面的数据
           acceptDataFromOpenedPage: function(data) {

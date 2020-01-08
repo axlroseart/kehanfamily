@@ -8,6 +8,9 @@ let actions = {
   },
   fetchUserStore({ commit }, data) {
     commit('USER_SCORE', data)
+  },
+  saveUserInfo({ commit }, data) {
+    commit('USER_INFO', data)
   }
 }
 
