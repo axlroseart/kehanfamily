@@ -52,6 +52,12 @@ export default {
           //   url: '/pages/index/main'
           // })
           this.$store.dispatch('fetchUserStore', res.score)
+          // token存储到本地
+          wx.setStorage({
+            key: 'token',
+            data: res.token
+          })
+          // 登录完跳转首页
           wx.navigateBack({
             delta: 1
           })

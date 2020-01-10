@@ -143,35 +143,59 @@ export default {
     }
   },
   onShow() {
-    console.log('==> 是否登录:', this.isLogin)
-    this.Api.fetchUserData({
-      usertoken: this.token
-    }).then(res => {
-      this._checkData(res).then(res => {
-        res = res.data
-        this.$store.dispatch('fetchUserStore', res.score)
-        this.$store.dispatch('saveUserInfo', res)
-        // 获取首页故事列表数据
-        this.getBaseData()
-      }).catch(err => {
-        if (err.code === 1000) {
-          wx.navigateTo({
-            url: '/pages/user/main'
+    let self = this
+    // 从本地拿token
+    wx.getStorage({
+      key: 'token',
+      success(response) {
+        let token = response.data
+        // 获取成功，查询用户信息
+        // console.log('==> 是否登录:', this.isLogin)
+        self.Api.fetchUserData({
+          usertoken: token
+        }).then(res => {
+          self._checkData(res).then(res => {
+            res = res.data
+            self.$store.dispatch('fetchUserStore', res.score)
+            self.$store.dispatch('saveUserInfo', res)
+            self.$store.dispatch('setToken', token).then(() => {
+              // 获取首页故事列表数据
+              self.getBaseData()
+            })
+          }).catch(err => {
+            if (err.code === 1000) {
+              wx.showToast({
+                title: '登录已过期',
+                icon: 'none',
+                duration: 2000,
+                success: function() {
+                  wx.navigateTo({
+                    url: '/pages/user/main'
+                  })
+                }
+              })
+            } else {
+              wx.showToast({
+                title: err.msg,
+                icon: 'none',
+                duration: 2000
+              })
+            }
           })
-        } else {
+        }).catch(() => {
           wx.showToast({
-            title: err.msg,
+            title: '获取用户信息失败',
             icon: 'none',
             duration: 2000
           })
-        }
-      })
-    }).catch(() => {
-      wx.showToast({
-        title: '获取用户信息失败',
-        icon: 'none',
-        duration: 2000
-      })
+        })
+      },
+      fail() {
+        // 未获取到token，跳转登录重新获取
+        wx.navigateTo({
+          url: '/pages/user/main'
+        })
+      }
     })
   },
   onLoad(data) {

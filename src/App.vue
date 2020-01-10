@@ -30,6 +30,9 @@ export default {
       logs.unshift(Date.now())
       mpvue.setStorageSync('logs', logs)
     }
+    wx.showShareMenu({
+      withShareTicket: true
+    })
     // 测试云函数
     // wx.cloud.callFunction({
     //   name: 'test',

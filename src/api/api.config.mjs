@@ -56,6 +56,14 @@ const apiConfig = {
     type: 'url',
     params: {
     }
+  },
+  // 听力计时
+  saveUserReadTime: {
+    url: '/mapp/user/addReadTime',
+    method: 'POST',
+    type: 'json',
+    params: {
+    }
   }
 }
 

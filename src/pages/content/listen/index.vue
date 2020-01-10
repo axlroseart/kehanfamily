@@ -116,7 +116,14 @@ export default {
       interval: 1500,
       duration: 0,
       circular: false,
-      rollbacktimer: null
+      rollbacktimer: null,
+      // 开始播放时间
+      startTime: 0,
+      // 停止播放时间
+      endTime: 0,
+      // 持续总时间
+      processTime: 0,
+      processTimer: null
     }
   },
   onLoad() {
@@ -156,7 +163,18 @@ export default {
           })
           // 播放事件
           self.bgm.onPlay(() => {
-            console.log('==> on play')
+            self.startTime = new Date().getTime()
+            console.log('==> Player play')
+          })
+          // 暂停事件
+          self.bgm.onPause(() => {
+            self.getProcessTime(self.startTime)
+            console.log('==> Player pause')
+          })
+          // 停止事件
+          self.bgm.onStop(() => {
+            self.getProcessTime(self.startTime)
+            console.log('==> Player stop')
           })
           // 可以播放状态事件
           self.bgm.onCanplay(() => {
@@ -198,7 +216,6 @@ export default {
   },
   methods: {
     switchTab: function (prompt, res) {
-      console.log(prompt)
       let oIndex = res.mp.currentTarget.dataset.current
       this.cardCur = oIndex
     },
@@ -216,6 +233,7 @@ export default {
       this.isTimerPlaying = true
       // this.bgm.play()
       this.bgm.onTimeUpdate(() => {
+        console.log(this.bgm.currentTime)
         this.generateTime()
       })
       this.bgm.onEnded(() => {
@@ -227,7 +245,6 @@ export default {
       this.isTimerPlaying = false
     },
     stop() {
-      wx.miniProgram.navigateTo( 'pages/index/main?score=' + self.score + '')
       if (this.bgm.stop) this.bgm.stop()
       this.isTimerPlaying = false
       this.resetPlayer()
@@ -292,23 +309,32 @@ export default {
       this.timeArray = this.timeArray.sort((a, b) => a - b)
       // console.log(this.timeArray)
       let max = this.timeArray.length - 1
-      try {
-        this.timeArray.forEach((item, index) => {
-          prev = this.timeArray[index - 1] ? this.timeArray[index - 1] : 0
-          next = this.timeArray[index + 1] ? this.timeArray[index + 1] : max
-          if (currentTime > prev && currentTime < next) {
-            this.correctCurr = index
-            this.jumpToCurrPic()
-            throw new Error('break')
-          }
-        })
-      } catch (error) {
-        console.log(error)
+      for (let index = 0; index < this.timeArray.length; index++) {
+        prev = this.timeArray[index - 1] ? this.timeArray[index - 1] : 0
+        next = this.timeArray[index + 1] ? this.timeArray[index + 1] : max
+        if (currentTime > prev && currentTime < next) {
+          this.correctCurr = index
+          this.jumpToCurrPic()
+          return false
+        }
       }
+      // try {
+      //   this.timeArray.forEach((item, index) => {
+      //     prev = this.timeArray[index - 1] ? this.timeArray[index - 1] : 0
+      //     next = this.timeArray[index + 1] ? this.timeArray[index + 1] : max
+      //     if (currentTime > prev && currentTime < next) {
+      //       this.correctCurr = index
+      //       this.jumpToCurrPic()
+      //       throw new Error('break')
+      //     }
+      //   })
+      // } catch (error) {
+      //   console.log(error)
+      // }
     },
     // 跳转轮播图
     jumpToCurrPic() {
-      console.log('==> 要跳转的图片的索引：', this.correctCurr)
+      // console.log('==> 要跳转的图片的索引：', this.correctCurr)
       this.cardCur = this.correctCurr
     },
     swiperChange(e) {
@@ -320,13 +346,23 @@ export default {
       this.cardCur = e.mp.detail.current
       this.rollbacktimer = setTimeout(() => {
         this.jumpToCurrPic()
-      }, 2000)
+      }, 3000)
     },
     prevTrack() {
       
     },
     nextTrack() {
       
+    },
+    // clearTimer() {
+    //   clearInterval(this.processTimer)
+    //   console.log('==> 当前听力时长：', this.processTime)
+    // },
+    // 获取播放和停止的间隔时间
+    getProcessTime(startTime) {
+      this.endTime = new Date().getTime()
+      this.processTime += this.endTime - startTime
+      console.log('==> 当前听力时长：', this.processTime)
     },
     resetPlayer() {
       this.barWidth = 0
@@ -353,6 +389,10 @@ export default {
     if (this.bgm) this.bgm.stop()
   },
   onUnload() {
+    // // 如果还在播放，就
+    // if (isTimerPlaying) {
+    //   this.getProcessTime(this.startTime)
+    // }
     if (this.bgm) this.bgm.stop()
     // reset data
     // this.resource = null
@@ -361,6 +401,31 @@ export default {
     this.currentTrackIndex = 0
     this.duration = 0
     this.currentTime = 0
+    // 传值后台保存听力时长
+    if (this.processTime) {
+      this.Api.saveUserReadTime({
+        data: {
+          time: this.processTime
+        },
+        usertoken: this.token
+      }).then(res => {
+        this._checkData(res).then(res => {
+          console.log('==> 听力总时长（毫秒）：', res.data.readTimeInMinutes)
+        }).catch((err) => {
+          wx.showToast({
+            title: err.msg,
+            icon: 'none',
+            duration: 2000
+          })
+        })
+      }).catch(() => {
+        wx.showToast({
+          title: '服务器错误',
+          icon: 'none',
+          duration: 2000
+        })
+      })
+    }
   }
 }
 </script>
