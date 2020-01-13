@@ -172,6 +172,7 @@ export default {
             res = res.data
             this.$store.dispatch("fetchUserStore", res.score)
             this.$store.dispatch("saveUserInfo", res)
+            this.showTimes = this.capitalize(res.readTimes * 1000)
           })
           .catch(err => {
             if (err.code === 1000) {
@@ -196,7 +197,8 @@ export default {
       })
   },
   mounted() {
-    this.showTimes = this.capitalize(this.userInfo.readTimeInMinutes)
+    // readTimes为秒
+    console.log(this.capitalize(this.userInfo.readTimes * 1000))
   },
   methods: {
     goAboutPage() {

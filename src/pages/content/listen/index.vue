@@ -12,7 +12,9 @@
           <div class="swiper-wrap">
             <swiper 
               :current="cardCur"
-              :indicator-dots="indicatorDots" 
+              :indicator-dots="indicatorDots"
+              indicator-active-color="#2b90ff"
+              indicator-color="#e1e1e1"
               :autoplay="autoplay" 
               @change="swiperChange" 
               @animationfinish="animationfinish" 
@@ -123,7 +125,8 @@ export default {
       endTime: 0,
       // 持续总时间
       processTime: 0,
-      processTimer: null
+      processTimer: null,
+      action: ''
     }
   },
   onLoad() {
@@ -163,18 +166,29 @@ export default {
           })
           // 播放事件
           self.bgm.onPlay(() => {
-            self.startTime = new Date().getTime()
             console.log('==> Player play')
+            // 在seek的时候不会重新计算开始时间
+            if (self.action !== 'seek') {
+              self.startTime = new Date().getTime()
+            }
           })
           // 暂停事件
           self.bgm.onPause(() => {
-            self.getProcessTime(self.startTime)
             console.log('==> Player pause')
+            self.getProcessTime(self.startTime, 'pause')
+          })
+          // 进度跳转事件
+          self.bgm.onSeeked(() => {
+            console.log('==> Player seeked')
+            self.getProcessTime(self.startTime, 'seeked')
           })
           // 停止事件
           self.bgm.onStop(() => {
-            self.getProcessTime(self.startTime)
             console.log('==> Player stop')
+            // 如果音频还在播放，则计时并提交数据
+            if (self.isTimerPlaying) {
+              self.getProcessTime(self.startTime, 'stop')
+            }
           })
           // 可以播放状态事件
           self.bgm.onCanplay(() => {
@@ -220,35 +234,39 @@ export default {
       this.cardCur = oIndex
     },
     playAudio() {
+      this.isTimerPlaying = true
       console.log('==> 音乐对象：', this.bgm)
+      console.log('==> 当条音轨数据：', this.currentTrack)
       // this.bgm.title = this.currentTrack.title
       // this.bgm.epname = this.currentTrack.title
       // this.bgm.singer = this.currentTrack.title
       // this.bgm.coverImgUrl = ''
       if (this.bgm.src === '') {
         this.bgm.src = this.currentTrack.audioFile
+        this.bgm.title = this.currentTrack.title
       } else {
         this.bgm.play()
       }
-      this.isTimerPlaying = true
       // this.bgm.play()
       this.bgm.onTimeUpdate(() => {
-        console.log(this.bgm.currentTime)
+        // console.log(this.bgm.currentTime)
         this.generateTime()
       })
       this.bgm.onEnded(() => {
         this.isTimerPlaying = false
+        this.getProcessTime(this.startTime, 'end')
       })
     },
     pause() {
       if (this.bgm.pause) this.bgm.pause()
-      this.isTimerPlaying = false
+      // this.isTimerPlaying = false
     },
     stop() {
       if (this.bgm.stop) this.bgm.stop()
-      this.isTimerPlaying = false
+      // this.isTimerPlaying = false
       this.resetPlayer()
     },
+    // 时间同步格式化
     generateTime() {
       let width = (100 / this.bgm.duration) * this.bgm.currentTime
       this.barWidth = width + "%"
@@ -274,7 +292,20 @@ export default {
       this.duration = durmin + ":" + dursec
       this.currentTime = curmin + ":" + cursec
     },
+    // 跳转进度条
+    clickProgress(e) {
+      if (!this.isTimerPlaying) {
+        return
+      }
+      let dom = wx.createSelectorQuery().select('.progress__bar')
+      let self = this
+      dom.boundingClientRect(function(rect) {
+        self.updateBar(e.pageX, rect)
+      }).exec()
+    },
+    // 更新进度条操作
     updateBar(x, rect) {
+      this.action = 'seek'
       let maxduration = this.bgm.duration
       let position = x - rect.left
       let percentage = (100 * position) / rect.width
@@ -288,20 +319,26 @@ export default {
       this.circleLeft = percentage + "%"
       this.currentTime = (maxduration * percentage) / 100
       console.log('==> 当前音频时间：', this.currentTime)
-      
       this.bgm.seek(this.currentTime)
-      this.bgm.play()
+      // this.bgm.play()
+      // 设置跳转
+      // wx.seekBackgroundAudio({
+      //   position: Math.floor(this.currentTime),
+      //   success: () => {
+      //     console.log('seek success')
+      //     this.bgm.pause()
+      //   },
+      //   fail: () => {
+      //     wx.showToast({
+      //       title: '跳转失败',
+      //       icon: 'none',
+      //       duration: 2000
+      //     })
+      //     this.bgm.pause()
+      //   }
+      // })
     },
-    clickProgress(e) {
-      if (!this.isTimerPlaying) {
-        return
-      }
-      let dom = wx.createSelectorQuery().select('.progress__bar')
-      let self = this
-      dom.boundingClientRect(function(rect) {
-        self.updateBar(e.pageX, rect)
-      }).exec()
-    },
+    // 查找要跳转的轮播图的索引
     lookupindex(currentTime) {
       // 找到对应轮播图的索引
       let prev
@@ -318,19 +355,6 @@ export default {
           return false
         }
       }
-      // try {
-      //   this.timeArray.forEach((item, index) => {
-      //     prev = this.timeArray[index - 1] ? this.timeArray[index - 1] : 0
-      //     next = this.timeArray[index + 1] ? this.timeArray[index + 1] : max
-      //     if (currentTime > prev && currentTime < next) {
-      //       this.correctCurr = index
-      //       this.jumpToCurrPic()
-      //       throw new Error('break')
-      //     }
-      //   })
-      // } catch (error) {
-      //   console.log(error)
-      // }
     },
     // 跳转轮播图
     jumpToCurrPic() {
@@ -359,10 +383,43 @@ export default {
     //   console.log('==> 当前听力时长：', this.processTime)
     // },
     // 获取播放和停止的间隔时间
-    getProcessTime(startTime) {
+    getProcessTime(startTime, ename) {
       this.endTime = new Date().getTime()
       this.processTime += this.endTime - startTime
-      console.log('==> 当前听力时长：', this.processTime)
+      console.log('==> 触发的事件：', ename)
+      console.log('==> 此次提交听力时长：', this.processTime)
+      // 重置seek逻辑
+      this.action = ''
+      // 传值后台保存听力时长
+      if (this.processTime) {
+        this.Api.saveUserReadTime({
+          data: {
+            time: this.processTime
+          },
+          usertoken: this.token
+        }).then(res => {
+          this._checkData(res).then(res => {
+            console.log('==> 听力总时长：', res.data.readTimeInMinutes + '分钟')
+            // 每次提交完毕都将累计听力时长置为0，因为停止的时候已经提交了当前段的听力时长数据
+            // TODO - 提交失败情况下，processTime的处理
+            // 是清0，还是继续累计？（算长了或者算短了的问题）
+            this.processTime = 0
+          }).catch((err) => {
+            wx.showToast({
+              title: err.msg,
+              icon: 'none',
+              duration: 2000
+            })
+          })
+        }).catch(() => {
+          wx.showToast({
+            title: '服务器错误',
+            icon: 'none',
+            duration: 2000
+          })
+        })
+      }
+      this.isTimerPlaying = false
     },
     resetPlayer() {
       this.barWidth = 0
@@ -386,46 +443,20 @@ export default {
     })
   },
   onHide() {
-    if (this.bgm) this.bgm.stop()
+    // if (this.bgm) this.bgm.stop()
   },
   onUnload() {
-    // // 如果还在播放，就
-    // if (isTimerPlaying) {
-    //   this.getProcessTime(this.startTime)
+    // 如果还在播放，就
+    // if (this.isTimerPlaying) {
+    //   this.getProcessTime(this.startTime, 'unload')
     // }
     if (this.bgm) this.bgm.stop()
-    // reset data
-    // this.resource = null
     this.correctCurr = 0
     this.cardCur = 0
     this.currentTrackIndex = 0
     this.duration = 0
     this.currentTime = 0
-    // 传值后台保存听力时长
-    if (this.processTime) {
-      this.Api.saveUserReadTime({
-        data: {
-          time: this.processTime
-        },
-        usertoken: this.token
-      }).then(res => {
-        this._checkData(res).then(res => {
-          console.log('==> 听力总时长（毫秒）：', res.data.readTimeInMinutes)
-        }).catch((err) => {
-          wx.showToast({
-            title: err.msg,
-            icon: 'none',
-            duration: 2000
-          })
-        })
-      }).catch(() => {
-        wx.showToast({
-          title: '服务器错误',
-          icon: 'none',
-          duration: 2000
-        })
-      })
-    }
+    this.processTime = 0
   }
 }
 </script>
