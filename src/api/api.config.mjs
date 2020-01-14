@@ -64,6 +64,14 @@ const apiConfig = {
     type: 'json',
     params: {
     }
+  },
+  // 登出
+  logOut: {
+    url: '/mapp/logout',
+    method: 'POST',
+    type: 'json',
+    params: {
+    }
   }
 }
 

@@ -104,6 +104,12 @@
           <text class="text-grey text-sm">可汗家</text>
         </view>
       </view>
+      <view
+        class="logout-btn"
+        @click="logOut"
+      >
+        <button class="cu-btn bg-gray lg">退出登录</button>
+      </view>
     </view>
   </div>
 </template>
@@ -198,7 +204,7 @@ export default {
   },
   mounted() {
     // readTimes为秒
-    console.log(this.capitalize(this.userInfo.readTimes * 1000))
+    // console.log(this.capitalize(this.userInfo.readTimes * 1000))
   },
   methods: {
     goAboutPage() {
@@ -234,6 +240,29 @@ export default {
         time = daysRound * 24 * 60 + hoursRound * 60 + minutesRound + '分钟'
       }
       return time
+    },
+    logOut() {
+      this.Api.logOut({
+        usertoken: this.token
+      }).then(res => {
+        this._checkData(res).then(() => {
+          wx.navigateTo({
+            url: "/pages/user/main"
+          })
+        }).catch(err => {
+          wx.showToast({
+            title: err.msg,
+            icon: "none",
+            duration: 2000
+          })
+        })
+      }).catch(err => {
+        wx.showToast({
+          title: "服务失败",
+          icon: "none",
+          duration: 2000
+        })
+      })
     }
   },
   computed: {
