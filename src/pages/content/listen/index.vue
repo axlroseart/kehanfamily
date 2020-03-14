@@ -120,7 +120,7 @@ export default {
       circular: false,
       rollbacktimer: null,
       // 开始播放时间
-      startTime: 0,
+      startTime: new Date().getTime(),
       // 停止播放时间
       endTime: 0,
       // 持续总时间
@@ -384,6 +384,7 @@ export default {
     // },
     // 获取播放和停止的间隔时间
     getProcessTime(startTime, ename) {
+      console.log('==> 此时的开始时间：', startTime)
       this.endTime = new Date().getTime()
       this.processTime += this.endTime - startTime
       console.log('==> 触发的事件：', ename)

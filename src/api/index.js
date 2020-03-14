@@ -20,7 +20,7 @@ function _apiGenerator(config) {
     apiMap[name] = (formData, extra) => {
       // console.log(`==> api url : ${apiRoute.url} \n`)
       // 添加时间戳
-      formData = {...formData, ...{t: new Date().getTime()}}
+      // formData = {...formData, ...{t: new Date().getTime()}}
 
       let url = apiRoute.url
       let params
