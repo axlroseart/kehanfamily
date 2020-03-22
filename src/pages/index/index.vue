@@ -144,6 +144,7 @@ export default {
   },
   onShow() {
     let self = this
+    this.TabCur = 0
     // 从本地拿token
     wx.getStorage({
       key: 'token',
@@ -293,10 +294,14 @@ export default {
       this.fetchCurrLevelData(id)
     },
     fetchCurrLevelData(id) {
+      wx.showLoading({
+        title: '获取数据中'
+      })
       this.Api.fetchBookData({
         data: id,
         usertoken: this.token
       }).then(res => {
+        wx.hideLoading()
         this._checkData(res).then(res => {
           this.currLevelBooks = res.data
         })
