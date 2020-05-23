@@ -11,8 +11,8 @@
       <!-- partial:index.partial.html -->
       <!-- 听金币 -->
       <div class="wrapper" v-if="type === 'listen'">
-        <div class="player">
-          <div class="swiper-wrap">
+        <!-- <div class="player"> -->
+          <!-- <div class="swiper-wrap"> -->
             <!-- <swiper class="listen-page-swiper" :class="dotStyle?'square-dot':'round-dot'" :indicator-dots="true" :circular="true"
             :autoplay="false" interval="5000" duration="500">
               <swiper-item v-for="(item,index) in swiperList" :key="index" :class="cardCur == index ? 'cur' : ''">
@@ -32,7 +32,7 @@
                 </swiper-item>
               </div>
             </swiper>
-          </div>
+          <!-- </div> -->
           <div class="player__top">
             <!-- <div class="player-cover"> -->
               <!-- <div
@@ -80,7 +80,7 @@
             </div>
             <div class="progress__time">{{ currentTime }}</div>
           </div>
-        </div>
+        <!-- </div> -->
       </div>
       <!-- partial -->
     </view>

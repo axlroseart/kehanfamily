@@ -5,11 +5,11 @@
       <img :src="gold_coin" alt="">
       <label>{{ score }}</label>
     </div>
-    <view class="padding content-wrap">
+    <view class="content-wrap">
       <!-- 听金币 -->
       <div class="wrapper">
-        <div class="player">
-          <div class="swiper-wrap">
+        <!-- <div class="player"> -->
+          <!-- <div class="swiper-wrap"> -->
             <swiper 
               :current="cardCur"
               :indicator-dots="indicatorDots"
@@ -26,38 +26,14 @@
                 </swiper-item>
               </div>
             </swiper>
-          </div>
+          <!-- </div> -->
           <div class="player__top">
-            <!-- <div class="player-cover"> -->
-              <!-- <div
-                class="player-cover__item"
-                v-show="$index === currentTrackIndex"
-                v-for="(track, $index) in tracks"
-                :key="$index"
-                :style="{ 'background': 'url(' + track.cover + ')' }"
-              > -->
-            <!-- </div> -->
             <!-- 按钮控制区 -->
             <div class="player-controls">
-              <!-- <div
-                class="player-controls__item -favorite"
-                :class="{ active : currentTrack.favorited }"
-                @click="favorite"
-              >
-                <text class="cuIcon-like"></text>
-              </div> -->
-              <!-- <text class="listen-text" @click="stop">停止播放</text> -->
               <button class="cu-btn lines-blue round shadow" @click="stop">停止播放</button>
-              <!-- <div class="player-controls__item" @click="prevTrack">
-                <text class="cuIcon-pullleft"></text>
-              </div>
-              <div class="player-controls__item" @click="nextTrack">
-                <text class="cuIcon-pullright"></text>
-              </div> -->
               <div class="player-controls__item -xl js-play">
                 <text class="cuIcon-playfill" v-if="!isTimerPlaying && isCanPlay" @click="playAudio"></text>
                 <text class="cuIcon-stop" v-else-if="isTimerPlaying && isCanPlay" @click="pause"></text>
-                <!-- <text loading class="cuIcon-loading2 cuIconfont-spin"></text> -->
                 <button class="cu-btn block bg-black margin-tb-sm lg" loading v-else></button>
               </div>
             </div>
@@ -75,7 +51,7 @@
             </div>
             <div class="progress__time">{{ currentTime }}</div>
           </div>
-        </div>
+        <!-- </div> -->
       </div>
       <!-- partial -->
     </view>
@@ -297,6 +273,8 @@ export default {
       if (!this.isTimerPlaying) {
         return
       }
+      // 先暂停播放
+      this.bgm.pause()
       let dom = wx.createSelectorQuery().select('.progress__bar')
       let self = this
       dom.boundingClientRect(function(rect) {

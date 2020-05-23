@@ -82,9 +82,9 @@
           <!-- 每条故事信息 -->
           <!-- <div class="story-list" @click="actionTypeChoose"> -->
           <div class="story-list">
-            <p class="info">
+            <!-- <p class="info">
               <label>{{ item.summary }}</label>
-            </p>
+            </p> -->
             <div class="list-main">
               <img :src="item.cover" alt="">
               <div class="title-info">
@@ -333,10 +333,10 @@ export default {
 </script>
 
 <style scoped>
-.slide-image {
+/* .slide-image {
   width: 100%;
   height: 100%;
-}
+} */
 .weui-demo-dialog {
   visibility: hidden;
   opacity: 0;
