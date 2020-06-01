@@ -4,7 +4,9 @@ const state = {
   isLogin: false,
   token: '',
   score: 0,
-  userInfo: 0
+  userInfo: {
+    score: 0
+  }
 }
 
 export default {

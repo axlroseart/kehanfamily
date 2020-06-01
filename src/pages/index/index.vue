@@ -102,6 +102,7 @@
               <!-- <button @click="goStory('listen', item.id)">听金币</button>
               <button @click="goStory('click', item.id)">点金币</button> -->
             </div>
+          <!-- </div> -->
           </div>
         </div>
       </div>
@@ -145,43 +146,33 @@ export default {
   onShow() {
     let self = this
     this.TabCur = 0
+    // 获取首页故事列表数据
+    self.getBaseData()
     // 从本地拿token
     wx.getStorage({
       key: 'token',
       success(response) {
         let token = response.data
         // 获取成功，查询用户信息
-        // console.log('==> 是否登录:', this.isLogin)
         self.Api.fetchUserData({
           usertoken: token
         }).then(res => {
           self._checkData(res).then(res => {
             res = res.data
             self.$store.dispatch('fetchUserStore', res.score)
+            self.$store.dispatch('fetchLoginStatus', true)
             self.$store.dispatch('saveUserInfo', res)
             self.$store.dispatch('setToken', token).then(() => {
               // 获取首页故事列表数据
-              self.getBaseData()
+              // self.getBaseData()
             })
           }).catch(err => {
-            if (err.code === 1000) {
-              wx.showToast({
-                title: '登录已过期',
-                icon: 'none',
-                duration: 2000,
-                success: function() {
-                  wx.navigateTo({
-                    url: '/pages/user/main'
-                  })
-                }
-              })
-            } else {
-              wx.showToast({
-                title: err.msg,
-                icon: 'none',
-                duration: 2000
-              })
-            }
+            // wx.showToast({
+            //   title: err.msg,
+            //   icon: 'none',
+            //   duration: 2000
+            // })
+            console.log('==> 未登录：', err)
           })
         }).catch(() => {
           wx.showToast({
@@ -193,9 +184,10 @@ export default {
       },
       fail() {
         // 未获取到token，跳转登录重新获取
-        wx.navigateTo({
-          url: '/pages/user/main'
-        })
+        // wx.navigateTo({
+        //   url: '/pages/user/main'
+        // })
+        // 未登录，暂时不做任何动作
       }
     })
   },
@@ -220,18 +212,11 @@ export default {
           // 请求默认第一个级别的书籍数据
           this.fetchCurrLevelData(defaultLevelId)
         }).catch(err => {
-          // 未登录
-          if (err.code === 1000) {
-            wx.navigateTo({
-              url: '/pages/user/main'
-            })
-          } else {
-            wx.showToast({
-              title: err.msg,
-              icon: 'none',
-              duration: 2000
-            })
-          }
+          wx.showToast({
+            title: err.msg,
+            icon: 'none',
+            duration: 2000
+          })
         })
       }).catch(() => {
         wx.showToast({
@@ -258,24 +243,61 @@ export default {
     },
     // 故事内容页跳转
     goStory(type, id) {
-      wx.navigateTo({
-        url: '/pages/content/' + type + '/main?score=999',
-        events: {
-          // 为指定事件添加一个监听器，获取被打开页面传送到当前页面的数据
-          acceptDataFromOpenedPage: function(data) {
-            console.log(data)
-          }
-        },
-        success: function(res) {
-          // 通过eventChannel向被打开页面传送数据
-          // res.eventChannel.emit('acceptDataFromOpenerPage', { type: type === '听金币' ? 'listen' : 'click' })
-          res.eventChannel.emit('acceptDataFromOpenerPage', {
-            type: type,
-            data: {
-              id: id
+      // 获取所选章节下面的课程信息
+      this.Api.fetchChapterData({
+        data: id,
+        usertoken: this.token
+      }).then(res => {
+        this._checkData(res).then(res => {
+          let curr = res.data
+          this.itemList = []
+          let arr = []
+          curr.forEach(element => {
+            this.itemList.push({
+              title: element.resource.title,
+              id: element.resource.id
+            })
+            arr.push(element.resource.title)
+          })
+          this.itemList.push({
+            title: 'test',
+            id: 99999
+          })
+          let self = this
+          wx.showActionSheet({
+            itemList: arr,
+            success: function(res) {
+              let dataIndex = res.tapIndex
+              // 没登录先去登录
+              if (!self.isLogin) {
+                wx.navigateTo({
+                  url: '/pages/user/main'
+                })
+                return
+              }
+              wx.navigateTo({
+                url: '/pages/content/' + type + '/main?score=999',
+                events: {
+                  // 为指定事件添加一个监听器，获取被打开页面传送到当前页面的数据
+                  acceptDataFromOpenedPage: function(data) {
+                    console.log(data)
+                  }
+                },
+                success: function(res) {
+                  // 通过eventChannel向被打开页面传送数据
+                  res.eventChannel.emit('acceptDataFromOpenerPage', {
+                    type: type,
+                    data: {
+                      id: id,
+                      index: dataIndex
+                    },
+                    result: curr[dataIndex]
+                  })
+                }
+              })
             }
           })
-        }
+        })
       })
     },
     // cardSwiper
@@ -304,6 +326,13 @@ export default {
         wx.hideLoading()
         this._checkData(res).then(res => {
           this.currLevelBooks = res.data
+        })
+      }).catch((err) => {
+        wx.hideLoading()
+        wx.showToast({
+          title: err.msg,
+          icon: 'none',
+          duration: 2000
         })
       })
     },

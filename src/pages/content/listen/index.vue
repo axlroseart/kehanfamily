@@ -115,93 +115,94 @@ export default {
     // 监听acceptDataFromOpenerPage事件，获取上一页面通过eventChannel传送到当前页面的数据
     eventChannel.on('acceptDataFromOpenerPage', function(data) {
       // 请求所点击的故事的详细信息
-      self.Api.fetchChapterData({
-        data: data.data.id,
-        usertoken: self.token
-      }).then(res => {
-        self._checkData(res).then(res => {
-          let curr = res.data[0]
-          self.webViewSrc = self.webViewSrc + '?id=' + curr.resource.id + '&token=' + self.token + ''
-          self.resource = curr
-          console.log('==> 听金币')
-          self.swiperList = curr.slides
-          self.timeArray = curr.slides.map(x => x.showIn)
-          self.currentTrack = curr.resource
-          self.bgm.title = curr.resource.title
-          self.bgm.epname = curr.resource.title
-          self.bgm.singer = curr.resource.title
-          self.bgm.coverImgUrl = ''
-          console.log(curr.resource.audioFile)
-          // 设置了 src 之后会自动播放
-          self.bgm.src = curr.resource.audioFile
-          self.pause()
-          wx.hideLoading()
-          // 加载中事件
-          self.bgm.onWaiting(() => {
-            console.log('等待播放中', self.bgm.duration)
-          })
-          // 播放事件
-          self.bgm.onPlay(() => {
-            console.log('==> Player play')
-            // 在seek的时候不会重新计算开始时间
-            if (self.action !== 'seek') {
-              self.startTime = new Date().getTime()
-            }
-          })
-          // 暂停事件
-          self.bgm.onPause(() => {
-            console.log('==> Player pause')
-            self.getProcessTime(self.startTime, 'pause')
-          })
-          // 进度跳转事件
-          self.bgm.onSeeked(() => {
-            console.log('==> Player seeked')
-            self.getProcessTime(self.startTime, 'seeked')
-          })
-          // 停止事件
-          self.bgm.onStop(() => {
-            console.log('==> Player stop')
-            // 如果音频还在播放，则计时并提交数据
-            if (self.isTimerPlaying) {
-              self.getProcessTime(self.startTime, 'stop')
-            }
-          })
-          // 可以播放状态事件
-          self.bgm.onCanplay(() => {
-            console.log('可以播放了', self.bgm)
-            self.isCanPlay = true
-            if (!self.isTimerPlaying) {
-              self.bgm.pause()
-            }
-            setTimeout(() => {
-              self.generateTime()
-            }, 1000)
-          })
-          // 播放错误事件
-          self.bgm.onError(() => {
-            console.log('==> Error')
-            wx.showToast({
-              title: '音频加载失败',
-              icon: 'none',
-              duration: 2000
-            })
-          })
-        }).catch(err => {
-          wx.hideLoading()
-          wx.showToast({
-            title: err.msg,
-            icon: 'none',
-            duration: 2000
-          })
-        })
-      }).catch(() => {
-        wx.hideLoading()
+      // self.Api.fetchChapterData({
+      //   data: data.data.id,
+      //   usertoken: self.token
+      // }).then(res => {
+      //   self._checkData(res).then(res => {
+      // let curr = res.data[0]
+      let curr = data.result
+      // self.webViewSrc = self.webViewSrc + '?id=' + curr.resource.id + '&token=' + self.token + ''
+      // self.resource = curr
+      console.log('==> 听金币')
+      self.swiperList = curr.slides
+      self.timeArray = curr.slides.map(x => x.showIn)
+      self.currentTrack = curr.resource
+      self.bgm.title = curr.resource.title
+      self.bgm.epname = curr.resource.title
+      self.bgm.singer = curr.resource.title
+      self.bgm.coverImgUrl = ''
+      console.log(curr.resource.audioFile)
+      // 设置了 src 之后会自动播放
+      self.bgm.src = curr.resource.audioFile
+      self.pause()
+      wx.hideLoading()
+      // 加载中事件
+      self.bgm.onWaiting(() => {
+        console.log('等待播放中', self.bgm.duration)
+      })
+      // 播放事件
+      self.bgm.onPlay(() => {
+        console.log('==> Player play')
+        // 在seek的时候不会重新计算开始时间
+        if (self.action !== 'seek') {
+          self.startTime = new Date().getTime()
+        }
+      })
+      // 暂停事件
+      self.bgm.onPause(() => {
+        console.log('==> Player pause')
+        self.getProcessTime(self.startTime, 'pause')
+      })
+      // 进度跳转事件
+      self.bgm.onSeeked(() => {
+        console.log('==> Player seeked')
+        self.getProcessTime(self.startTime, 'seeked')
+      })
+      // 停止事件
+      self.bgm.onStop(() => {
+        console.log('==> Player stop')
+        // 如果音频还在播放，则计时并提交数据
+        if (self.isTimerPlaying) {
+          self.getProcessTime(self.startTime, 'stop')
+        }
+      })
+      // 可以播放状态事件
+      self.bgm.onCanplay(() => {
+        console.log('可以播放了', self.bgm)
+        self.isCanPlay = true
+        if (!self.isTimerPlaying) {
+          self.bgm.pause()
+        }
+        setTimeout(() => {
+          self.generateTime()
+        }, 1000)
+      })
+      // 播放错误事件
+      self.bgm.onError((e) => {
+        console.log('==> Error', e)
         wx.showToast({
-          title: '服务器错误',
+          title: '音频加载失败',
           icon: 'none',
           duration: 2000
         })
       })
+        // }).catch(err => {
+        //   wx.hideLoading()
+        //   wx.showToast({
+        //     title: err.msg,
+        //     icon: 'none',
+        //     duration: 2000
+        //   })
+        // })
+      // }).catch(() => {
+      //   wx.hideLoading()
+      //   wx.showToast({
+      //     title: '服务器错误',
+      //     icon: 'none',
+      //     duration: 2000
+      //   })
+      // })
     })
   },
   methods: {

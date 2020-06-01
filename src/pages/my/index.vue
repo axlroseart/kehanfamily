@@ -1,41 +1,9 @@
 <template>
   <div class="my-index">
-    <!-- <view class="cu-bar bg-white solid-bottom margin-top">
-      <view class="action">
-        <text class="cuIcon-title text-orange"></text> 我的
-      </view>
-    </view>
-    <view class="cu-card case no-card">
-			<view class="cu-item shadow">
-				<view class="cu-list menu-avatar">
-					<view class="cu-item">
-						<view class="cu-avatar round lg" style="background-image:url(https://ossweb-img.qq.com/images/lol/web201310/skin/big10006.jpg)"></view>
-						<view class="content flex-sub">
-							<view class="text-grey">{{ userInfo.name }}</view>
-							<view class="text-gray text-sm flex justify-between">
-								<view class="text-gray text-sm">
-									<text class="cuIcon-voice margin-lr-xs">听力时长</text> {{ userInfo.readTimes }} 分钟
-									<text class="cuIcon-coin margin-lr-xs">金币</text> {{ userInfo.score }}
-								</view>
-							</view>
-						</view>
-					</view>
-				</view>
-			</view>
-		</view> -->
-    <!-- <view class="cu-bar bg-white solid-bottom">
-			<view class="action">
-				<text class="cuIcon-titles text-orange"></text> 我的
-			</view>
-			<view class="action">
-				<switch :class="isCard?'checked':''" :checked="isCard?true:false" @change="IsCard"></switch>
-			</view>
-		</view> -->
     <view class="cu-card case no-card">
       <view class="cu-item shadow">
         <view class="image">
           <image :src="promoImg" mode="widthFix"></image>
-          <!-- <view class="cu-tag bg-blue">史诗</view> -->
           <view class="cu-bar bg-shadeBottom">
             <text class="text-cut"></text
           ></view>
@@ -46,14 +14,14 @@
               class="cu-avatar round lg"
               style="background-image:url(http://134.175.157.41/avatar.png)"
             ></view>
-            <view class="content flex-sub">
-              <view class="text-grey">{{ userInfo.name }}</view>
+            <view class="content flex-sub propers-text">
+              <view class="text-grey bold" v-if="isLogin">{{ userInfo.name }}</view>
+              <view class="text-grey bold" v-else @click="doLogin">点击登录</view>
               <view class="text-gray text-sm flex justify-between">
-                -
-                <view class="text-gray text-sm">
-                  <text class="cuIcon-time margin-lr-xs">听力时长</text>
+                <view class="text-gray text">
+                  <text class="cuIcon-time margin-lr-xs propers-text">听力时长</text>
                   <text class="text-blue">{{ showTimes }}</text>
-                  <text class="cuIcon-coin margin-lr-xs">金币</text>
+                  <text class="cuIcon-coin margin-lr-xs propers-text">金币</text>
                   <text class="text-blue">{{ userInfo.score }}</text>
                 </view>
               </view>
@@ -108,7 +76,7 @@
         class="logout-btn"
         @click="logOut"
       >
-        <button class="cu-btn bg-gray lg">退出登录</button>
+        <button class="cu-btn bg-gray lg" v-show="isLogin">退出登录</button>
       </view>
     </view>
   </div>
@@ -169,44 +137,39 @@ export default {
     }
   },
   onShow() {
+    console.log('==> 是否登录：', this.isLogin)
     this.Api.fetchUserData({
       usertoken: this.token
-    })
-      .then(res => {
-        this._checkData(res)
-          .then(res => {
-            res = res.data
-            this.$store.dispatch("fetchUserStore", res.score)
-            this.$store.dispatch("saveUserInfo", res)
-            this.showTimes = this.capitalize(res.readTimes * 1000)
-          })
-          .catch(err => {
-            if (err.code === 1000) {
-              wx.navigateTo({
-                url: "/pages/user/main"
-              })
-            } else {
-              wx.showToast({
-                title: err.msg,
-                icon: "none",
-                duration: 2000
-              })
-            }
-          })
-      })
-      .catch(() => {
-        wx.showToast({
-          title: "获取用户信息失败",
-          icon: "none",
-          duration: 2000
+    }).then(res => {
+      this._checkData(res)
+        .then(res => {
+          res = res.data
+          this.$store.dispatch("fetchUserStore", res.score)
+          this.$store.dispatch("saveUserInfo", res)
+          this.showTimes = this.capitalize(res.readTimes * 1000)
         })
+        .catch(err => {
+          console.log('==> 未登录：', res)
+        })
+    }).catch(() => {
+      wx.showToast({
+        title: "获取用户信息失败",
+        icon: "none",
+        duration: 2000
       })
+    })
   },
   mounted() {
     // readTimes为秒
     // console.log(this.capitalize(this.userInfo.readTimes * 1000))
   },
   methods: {
+    // 登录
+    doLogin() {
+      wx.navigateTo({
+        url: '/pages/user/main'
+      })
+    },
     goAboutPage() {
       wx.navigateTo({
         url: "/pages/my/about/main"
@@ -246,9 +209,16 @@ export default {
         usertoken: this.token
       }).then(res => {
         this._checkData(res).then(() => {
-          wx.navigateTo({
-            url: "/pages/user/main"
+          // wx.navigateTo({
+          //   url: "/pages/user/main"
+          // })
+          console.log('==> 退出成功')
+          // 重置数据
+          this.$store.dispatch('fetchLoginStatus', false)
+          this.$store.dispatch("saveUserInfo", {
+            score: 0
           })
+          this.showTimes = 0
         }).catch(err => {
           wx.showToast({
             title: err.msg,

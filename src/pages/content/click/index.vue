@@ -16,7 +16,8 @@ export default {
       // webViewSrc: 'https://ts-www.luckyins.com/thirdparty/#/',
       baseUrl: 'https://www.kehanjia.com/h5/index.html',
       webViewSrc: null,
-      id: 0
+      id: 0,
+      index: 0
     }
   },
   onLoad() {
@@ -26,10 +27,12 @@ export default {
     // 监听acceptDataFromOpenerPage事件，获取上一页面通过eventChannel传送到当前页面的数据
     eventChannel.on('acceptDataFromOpenerPage', function(data) {
       self.id = data.data.id
+      self.index = data.data.index
       console.log('==> id:', self.id)
+      console.log('==> index:', self.index)
       console.log('==> token:', self.token)
       console.log('==> score:', self.score)
-      self.webViewSrc = self.baseUrl + '?id=' + self.id + '&token=' + self.token + '&score=' + self.score + ''
+      self.webViewSrc = self.baseUrl + '?id=' + self.id + '&index=' + self.index + '&token=' + self.token + '&score=' + self.score + ''
       self.isdone = true
     })
   },
@@ -44,7 +47,6 @@ export default {
       console.log('==> error', e)
     },
     getMsgFromWebview(msg) {
-      console.log(msg)
       this.$store.dispatch('fetchUserStore', msg.detail.score)
     }
   },
