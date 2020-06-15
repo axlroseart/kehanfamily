@@ -140,14 +140,18 @@ export default {
       isShowActionDialog: false,
       currLevelBooks: [],
       test_account: 'test',
-      test_password: '123456'
+      test_password: '123456',
+      isGotData: false
     }
   },
   onShow() {
     let self = this
-    this.TabCur = 0
-    // 获取首页故事列表数据
-    self.getBaseData()
+    // this.TabCur = 0
+    console.log('==> 是否已经获取过数据：', this.isGotData)
+    if (!this.isGotData) {
+      // 获取首页故事列表数据
+      self.getBaseData()
+    }
     // 从本地拿token
     wx.getStorage({
       key: 'token',
@@ -243,11 +247,15 @@ export default {
     },
     // 故事内容页跳转
     goStory(type, id) {
+      wx.showLoading({
+        title: '获取数据中'
+      })
       // 获取所选章节下面的课程信息
       this.Api.fetchChapterData({
         data: id,
         usertoken: this.token
       }).then(res => {
+        wx.hideLoading()
         this._checkData(res).then(res => {
           let curr = res.data
           this.itemList = []
@@ -325,6 +333,7 @@ export default {
       }).then(res => {
         wx.hideLoading()
         this._checkData(res).then(res => {
+          this.isGotData = true
           this.currLevelBooks = res.data
         })
       }).catch((err) => {
