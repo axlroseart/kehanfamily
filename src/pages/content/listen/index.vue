@@ -42,7 +42,7 @@
             <div class="progress__top">
               <div class="album-info" v-if="currentTrack">
                 <div class="album-info__name">{{ currentTrack.title }}</div>
-                <div class="album-info__track">{{ currentTrack.title }}</div>
+                <!-- <div class="album-info__track">{{ currentTrack.title }}</div> -->
               </div>
               <div class="progress__duration">{{ duration }}</div>
             </div>
@@ -124,7 +124,7 @@ export default {
       let curr = data.result
       // self.webViewSrc = self.webViewSrc + '?id=' + curr.resource.id + '&token=' + self.token + ''
       // self.resource = curr
-      console.log('==> 听金币')
+      console.log('==> 听金币', curr)
       self.swiperList = curr.slides
       self.timeArray = curr.slides.map(x => x.showIn)
       self.currentTrack = curr.resource
@@ -400,6 +400,8 @@ export default {
         })
       }
       this.isTimerPlaying = false
+      // 播放停止继续重复播放
+      ename === 'end' ? this.playAudio() : !0
     },
     resetPlayer() {
       this.barWidth = 0

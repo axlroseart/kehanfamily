@@ -23,24 +23,6 @@
     </swiper>
     <!-- 主体内容部分 -->
     <view class="block">
-      <!-- <div class="aui-flex aui-flex-two">
-        <div class="aui-flex-box">
-          <img src="../../../static/images/ad-001.png" alt class="main-image-1" />
-        </div>
-        <div class="aui-flex-box">
-          <div class="aui-img-one-on">
-            <img src="../../../static/images/ad-002.png" alt class="main-image-2" />
-          </div>
-          <div class="aui-img-one-on">
-            <img src="../../../static/images/ad-003.png" alt class="main-image-3" />
-          </div>
-        </div>
-      </div> -->
-      <!-- <div class="aui-flex aui-flex-two">
-        <div class="aui-flex-box">
-          <img src="../../../static/images/ad-004.png" alt class="main-image-4" />
-        </div>
-      </div> -->
       <!-- tab 标签页 -->
       <div class="index-grade-tab">
         <!-- cu-ui-tab -->
@@ -51,31 +33,9 @@
             :class="index == TabCur ? 'text-white cur' : ''" 
             @tap="((e) => { tabSelect(e, item.id) })" 
             :data-id="index">
-            <text class="cuIcon-camerafill"></text> {{ item.name }}
+            <text class="cuIcon-read"></text> 
+            {{ item.name }}
           </view>
-          <!-- 级别 -->
-          <!-- <div class="weui-tab__content" :hidden="TabCur != '0'"> -->
-          <!-- 每条故事信息 -->
-          <!-- <div class="weui-tab__content" v-for="(data, index) in item.books" :key="index">
-            <div class="story-list" @click="actionTypeChoose">
-              <p class="info">
-                <i>{{ item.name }}</i> <label>童话故事</label>
-              </p>
-              <div class="list-main">
-                <img :src="data.cover" alt="">
-                <div class="title-info">
-                  <p class="story-title"><span>白雪公主和七个小矮人</span></p>
-                  <p>核心词汇：<span>100</span>个</p>
-                </div>
-                <button class="cu-btn cuIcon bg-red shadow" @click="goStory('listen')">
-                  <text class="cuIcon-musicfill"></text>
-                </button>
-                <button class="cu-btn cuIcon bg-blue shadow" @click="goStory('click')">
-                  <text class="cuIcon-read"></text>
-                </button>
-              </div>
-            </div>
-          </div> -->
         </scroll-view>
         <!-- <div class="weui-tab__content" :hidden="TabCur != '0'"> -->
         <div class="weui-tab__content" v-for="(item, index) in currLevelBooks" :key="index">
@@ -108,6 +68,19 @@
       </div>
     </view>
     <!-- 操作弹窗 -->
+    <view class="cu-modal story-choose-dialog" :class="showChooseList ? 'show' : ''" @tap="showChooseList = !showChooseList">
+			<view class="cu-dialog" @tap.stop="">
+        <p class="dialog-title">{{ chooseType === 'listen' ? '听金币' : '点金币' }}</p>
+				<view class="cu-list menu sm-border">
+          <view class="cu-item arrow" v-for="(item, index) in itemList" :key="index" @click="storyHandler(index)">
+            <view class="content">
+              <!-- <text class="cuIcon-circlefill text-grey"></text> -->
+              <text class="text-black">{{ item.title }}</text>
+            </view>
+          </view>
+        </view>
+			</view>
+		</view>
   </div>
 </template>
 
@@ -141,7 +114,14 @@ export default {
       currLevelBooks: [],
       test_account: 'test',
       test_password: '123456',
-      isGotData: false
+      isGotData: false,
+      showChooseList: false,
+      // 操作类型
+      chooseType: '',
+      // 章节ID
+      currChapterId: 0,
+      // 章节课程数据
+      currChapterInfo: []
     }
   },
   onShow() {
@@ -247,6 +227,8 @@ export default {
     },
     // 故事内容页跳转
     goStory(type, id) {
+      this.chooseType = type
+      this.currChapterId = id
       wx.showLoading({
         title: '获取数据中'
       })
@@ -257,55 +239,51 @@ export default {
       }).then(res => {
         wx.hideLoading()
         this._checkData(res).then(res => {
-          let curr = res.data
+          this.currChapterInfo = res.data
           this.itemList = []
-          let arr = []
-          curr.forEach(element => {
+          this.currChapterInfo.forEach(element => {
             this.itemList.push({
               title: element.resource.title,
               id: element.resource.id
             })
-            arr.push(element.resource.title)
           })
-          this.itemList.push({
-            title: 'test',
-            id: 99999
-          })
-          let self = this
-          wx.showActionSheet({
-            itemList: arr,
-            success: function(res) {
-              let dataIndex = res.tapIndex
-              // 没登录先去登录
-              if (!self.isLogin) {
-                wx.navigateTo({
-                  url: '/pages/user/main'
-                })
-                return
-              }
-              wx.navigateTo({
-                url: '/pages/content/' + type + '/main?score=999',
-                events: {
-                  // 为指定事件添加一个监听器，获取被打开页面传送到当前页面的数据
-                  acceptDataFromOpenedPage: function(data) {
-                    console.log(data)
-                  }
-                },
-                success: function(res) {
-                  // 通过eventChannel向被打开页面传送数据
-                  res.eventChannel.emit('acceptDataFromOpenerPage', {
-                    type: type,
-                    data: {
-                      id: id,
-                      index: dataIndex
-                    },
-                    result: curr[dataIndex]
-                  })
-                }
-              })
-            }
-          })
+          if (this.itemList.length === 1) {
+            this.storyHandler(0)
+            return
+          }
+          // 显示选择框
+          this.showChooseList = true
         })
+      })
+    },
+    storyHandler(index) {
+      let self = this
+      // 没登录先去登录
+      if (!self.isLogin) {
+        wx.navigateTo({
+          url: '/pages/user/main'
+        })
+        return
+      }
+      wx.navigateTo({
+        url: '/pages/content/' + self.chooseType + '/main?score=999',
+        events: {
+          // 为指定事件添加一个监听器，获取被打开页面传送到当前页面的数据
+          acceptDataFromOpenedPage: function(data) {
+            console.log(data)
+          }
+        },
+        success: function(res) {
+          // 通过eventChannel向被打开页面传送数据
+          res.eventChannel.emit('acceptDataFromOpenerPage', {
+            type: self.chooseType,
+            data: {
+              id: self.currChapterId,
+              index: index
+            },
+            result: self.currChapterInfo[index]
+          })
+        }
       })
     },
     // cardSwiper
