@@ -187,6 +187,13 @@ export default {
           duration: 2000
         })
       })
+      self.bgm.onTimeUpdate(() => {
+        self.generateTime()
+      })
+      self.bgm.onEnded(() => {
+        self.isTimerPlaying = false
+        self.getProcessTime(self.startTime, 'end')
+      })
         // }).catch(err => {
         //   wx.hideLoading()
         //   wx.showToast({
@@ -214,25 +221,12 @@ export default {
       this.isTimerPlaying = true
       console.log('==> 音乐对象：', this.bgm)
       console.log('==> 当条音轨数据：', this.currentTrack)
-      // this.bgm.title = this.currentTrack.title
-      // this.bgm.epname = this.currentTrack.title
-      // this.bgm.singer = this.currentTrack.title
-      // this.bgm.coverImgUrl = ''
       if (this.bgm.src === '') {
         this.bgm.src = this.currentTrack.audioFile
         this.bgm.title = this.currentTrack.title
       } else {
         this.bgm.play()
       }
-      // this.bgm.play()
-      this.bgm.onTimeUpdate(() => {
-        // console.log(this.bgm.currentTime)
-        this.generateTime()
-      })
-      this.bgm.onEnded(() => {
-        this.isTimerPlaying = false
-        this.getProcessTime(this.startTime, 'end')
-      })
     },
     pause() {
       if (this.bgm.pause) this.bgm.pause()
@@ -401,7 +395,10 @@ export default {
       }
       this.isTimerPlaying = false
       // 播放停止继续重复播放
-      ename === 'end' ? this.playAudio() : !0
+      if (ename === 'end') {
+        this.stop()
+        this.playAudio()
+      }
     },
     resetPlayer() {
       this.barWidth = 0
